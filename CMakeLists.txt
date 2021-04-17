@@ -61,6 +61,7 @@ find_package(catkin REQUIRED
 ################################################
 
 add_message_files(DIRECTORY msg)
+add_service_files(DIRECTORY srv)
 
 generate_messages(DEPENDENCIES std_msgs geometry_msgs)
 

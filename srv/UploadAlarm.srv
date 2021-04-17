@@ -1,0 +1,4 @@
+AlarmItem[] alarms
+---
+bool success
+string message
