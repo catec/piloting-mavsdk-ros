@@ -47,9 +47,22 @@ set(MAVSDK_COMPONENTS
 ##################################
 
 find_package(catkin REQUIRED 
-   COMPONENTS  rospy roscpp std_msgs sensor_msgs)
+   COMPONENTS
+      roscpp
+      std_msgs
+      geometry_msgs
+      message_generation
+)
 
 #catkin_python_setup()
+
+################################################
+## Declare ROS messages, services and actions ##
+################################################
+
+add_message_files(DIRECTORY msg)
+
+generate_messages(DEPENDENCIES std_msgs geometry_msgs)
 
 ###################################
 ## CATKIN specific configuration ##
@@ -58,7 +71,7 @@ find_package(catkin REQUIRED
 catkin_package(
    INCLUDE_DIRS   include
    LIBRARIES      ${PROJECT_NAME}
-   CATKIN_DEPENDS rospy roscpp std_msgs sensor_msgs)
+   CATKIN_DEPENDS roscpp std_msgs geometry_msgs message_generation)
 
 ###########
 ## Build ##

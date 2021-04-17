@@ -15,6 +15,8 @@
 
 #include <mavsdk_ros/mavsdk_include.h>
 
+#include <mavsdk_ros/AlarmStatus.h>
+
 namespace mavsdk_ros {
 class MavsdkRosNode {
 public:
@@ -24,6 +26,10 @@ public:
     bool init();
 
 private:
+    void initAlarm(std::shared_ptr<mavsdk::System>& target_system);
+
+    void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
+
     ros::NodeHandle _nh;
 
     std::shared_ptr<mavsdk::Mavsdk> _mavsdk;
@@ -33,5 +39,12 @@ private:
     std::shared_ptr<mavsdk::ChecklistRoboticVehicle> _checklist;
     std::shared_ptr<mavsdk::CommandRoboticVehicle> _command;
     std::shared_ptr<mavsdk::HLActionRoboticVehicle> _hl_action;
+
+    // ROS Services
+
+    // ROS Publishers
+
+    // ROS Subscribers
+    ros::Subscriber _alarm_status_sub;
 };
 } // namespace mavsdk_ros

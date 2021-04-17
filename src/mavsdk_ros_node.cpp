@@ -51,13 +51,22 @@ bool MavsdkRosNode::init()
         ros::Duration(0.25).sleep();
     }
 
+    initAlarm(target_system);
+
     _telemetry = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
-    _alarm = std::make_shared<mavsdk::AlarmRoboticVehicle>(target_system);
     _checklist = std::make_shared<mavsdk::ChecklistRoboticVehicle>(target_system);
     _command = std::make_shared<mavsdk::CommandRoboticVehicle>(target_system);
     _hl_action = std::make_shared<mavsdk::HLActionRoboticVehicle>(target_system);
 
     return true;
+}
+
+void MavsdkRosNode::initAlarm(std::shared_ptr<mavsdk::System>& target_system)
+{
+    _alarm = std::make_shared<mavsdk::AlarmRoboticVehicle>(target_system);
+
+    _alarm_status_sub = _nh.subscribe<mavsdk_ros::AlarmStatus>(
+        "alarm_status", 10, &MavsdkRosNode::alarmStatusCb, this);
 }
 } // namespace mavsdk_ros
