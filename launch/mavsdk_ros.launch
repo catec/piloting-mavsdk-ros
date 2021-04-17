@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+   <arg name="config_file_path" default="$(find mavsdk_ros)/config/mavsdk_ros_config.yaml" doc="Configure file path"/>
+
+   <node name="mavsdk_ros" pkg="mavsdk_ros" type="mavsdk_ros_node" respawn="false" output="screen">
+      <rosparam command="load" file="$(arg config_file_path)"/>
+   </node>
+
+</launch>

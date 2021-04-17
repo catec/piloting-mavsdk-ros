@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+
+   <name>mavsdk_ros</name>
+   <version>0.1.0</version>
+   <description>The mavsdk_ros package</description>
+
+   <maintainer email="rcaballero@catec.aero">Rafael Caballero González</maintainer>
+
+   <license>BSD</license>
+
+   <buildtool_depend>catkin</buildtool_depend>
+
+   <depend>rospy</depend>
+   <depend>roscpp</depend>
+   <depend>std_msgs</depend>
+   <depend>sensor_msgs</depend>
+
+</package>
