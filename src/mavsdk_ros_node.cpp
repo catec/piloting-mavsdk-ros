@@ -52,11 +52,11 @@ bool MavsdkRosNode::init()
     }
 
     initAlarm(target_system);
+    initCommand(target_system);
 
     _telemetry  = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
     _checklist  = std::make_shared<mavsdk::ChecklistRoboticVehicle>(target_system);
-    _command    = std::make_shared<mavsdk::CommandRoboticVehicle>(target_system);
     _hl_action  = std::make_shared<mavsdk::HLActionRoboticVehicle>(target_system);
 
     return true;
@@ -70,5 +70,28 @@ void MavsdkRosNode::initAlarm(std::shared_ptr<mavsdk::System>& target_system)
 
     _set_upload_alarm_srv = _nh.advertiseService("set_upload_alarm", &MavsdkRosNode::setUploadAlarmCb, this);
     _upload_alarm_srv     = _nh.advertiseService("upload_alarm", &MavsdkRosNode::uploadAlarmCb, this);
+}
+
+void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
+{
+    _command = std::make_shared<mavsdk::CommandRoboticVehicle>(target_system);
+
+    _commands_ack_sub = _nh.subscribe<mavsdk_ros::CommandAck>("commands_ack", 10, &MavsdkRosNode::commandsAckCb, this);
+
+    _received_commands_pub = _nh.advertise<mavsdk_ros::CommandLong>("commands", 10);
+    _command->subscribe_command([&](mavsdk::CommandBase::CommandLong cmd) {
+        mavsdk_ros::CommandLong command_msg;
+        command_msg.command      = cmd.command;
+        command_msg.confirmation = cmd.confirmation;
+        command_msg.param1       = cmd.params.param1;
+        command_msg.param2       = cmd.params.param2;
+        command_msg.param3       = cmd.params.param3;
+        command_msg.param4       = cmd.params.param4;
+        command_msg.param5       = cmd.params.param5;
+        command_msg.param6       = cmd.params.param6;
+        command_msg.param7       = cmd.params.param7;
+
+        _received_commands_pub.publish(command_msg);
+    });
 }
 } // namespace mavsdk_ros

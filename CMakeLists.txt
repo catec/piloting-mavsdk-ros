@@ -87,7 +87,7 @@ file(GLOB_RECURSE SRC_SRCS "src/*.c*")
 file(GLOB_RECURSE SRC_HDRS "src/*.h*")
 
 add_library(${PROJECT_NAME}            ${SRC_SRCS} ${SRC_HDRS} ${SRC_INCS})
-add_dependencies(${PROJECT_NAME}       ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}       ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${MAVSDK_COMPONENTS})
 
 add_executable(${PROJECT_NAME}_node          src/main.cpp)

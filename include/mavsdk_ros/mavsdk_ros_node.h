@@ -15,8 +15,12 @@
 
 #include <mavsdk_ros/mavsdk_include.h>
 
+// msgs
 #include <mavsdk_ros/AlarmStatus.h>
+#include <mavsdk_ros/CommandLong.h>
+#include <mavsdk_ros/CommandAck.h>
 
+// srvs
 #include <mavsdk_ros/SetUploadAlarm.h>
 #include <mavsdk_ros/UploadAlarm.h>
 
@@ -30,8 +34,10 @@ public:
 
 private:
     void initAlarm(std::shared_ptr<mavsdk::System>& target_system);
+    void initCommand(std::shared_ptr<mavsdk::System>& target_system);
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
+    void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
 
     bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request, mavsdk_ros::SetUploadAlarm::Response& response);
     bool uploadAlarmCb(mavsdk_ros::UploadAlarm::Request& request, mavsdk_ros::UploadAlarm::Response& response);
@@ -51,8 +57,10 @@ private:
     ros::ServiceServer _upload_alarm_srv;
 
     // ROS Publishers
+    ros::Publisher _received_commands_pub;
 
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
+    ros::Subscriber _commands_ack_sub;
 };
 } // namespace mavsdk_ros
