@@ -121,4 +121,59 @@ bool MavsdkRosNode::uploadChecklistCb(
     return true;
 }
 
+bool MavsdkRosNode::setUploadHLActionCb(
+    mavsdk_ros::SetUploadHLAction::Request& request, mavsdk_ros::SetUploadHLAction::Response&)
+{
+    mavsdk::HLActionBase::HLActionList hl_action_list;
+    for (auto hl_action : request.hl_actions) {
+        mavsdk::HLActionBase::HLActionItem hl_action_item;
+        hl_action_item.index       = hl_action.index;
+        hl_action_item.command     = hl_action.command;
+        hl_action_item.name        = hl_action.name;
+        hl_action_item.description = hl_action.description;
+        hl_action_list.items.push_back(hl_action_item);
+    }
+
+    _hl_action->set_upload_hl_action(hl_action_list);
+
+    return true;
+}
+
+bool MavsdkRosNode::uploadHLActionCb(
+    mavsdk_ros::UploadHLAction::Request& request, mavsdk_ros::UploadHLAction::Response& response)
+{
+    mavsdk::HLActionBase::HLActionList hl_action_list;
+    for (auto hl_action : request.hl_actions) {
+        mavsdk::HLActionBase::HLActionItem hl_action_item;
+        hl_action_item.index       = hl_action.index;
+        hl_action_item.command     = hl_action.command;
+        hl_action_item.name        = hl_action.name;
+        hl_action_item.description = hl_action.description;
+        hl_action_list.items.push_back(hl_action_item);
+    }
+
+    auto prom = std::make_shared<std::promise<std::pair<mavsdk::HLActionBase::Result, mavsdk::HLActionBase::Ack>>>();
+    auto future_result = prom->get_future();
+
+    _hl_action->upload_hl_action_async(
+        [prom](mavsdk::HLActionBase::Result result, mavsdk::HLActionBase::Ack ack) {
+            prom->set_value(std::make_pair<>(result, ack));
+        },
+        hl_action_list);
+
+    const auto lambda_result            = future_result.get();
+    mavsdk::HLActionBase::Result result = lambda_result.first;
+    mavsdk::HLActionBase::Ack ack       = lambda_result.second;
+
+    std::stringstream ss;
+    ss << result << " - " << ack;
+    response.message = ss.str();
+
+    if (result != mavsdk::HLActionBase::Result::Success)
+        response.success = false;
+
+    response.success = true;
+    return true;
+}
+
 } // namespace mavsdk_ros
