@@ -11,6 +11,8 @@
 
 #include <mavsdk_ros/parameters.h>
 
+#include <std_msgs/UInt16.h>
+
 #include <mavsdk_ros/mavsdk_ros_node.h>
 
 namespace mavsdk_ros {
@@ -114,6 +116,14 @@ void MavsdkRosNode::initHLAction(std::shared_ptr<mavsdk::System>& target_system)
 void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_system)
 {
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
+
+    _received_inspection_set_current_pub = _nh.advertise<std_msgs::UInt16>("inspection_set_current", 10);
+    _inspection->subscribe_inspection_set_current([&](uint16_t seq) {
+        std_msgs::UInt16 set_current_msg;
+        set_current_msg.data = seq;
+
+        _received_inspection_set_current_pub.publish(set_current_msg);
+    });
 
     _set_upload_inspection_srv =
         _nh.advertiseService("set_upload_inspection", &MavsdkRosNode::setUploadInspectionCb, this);

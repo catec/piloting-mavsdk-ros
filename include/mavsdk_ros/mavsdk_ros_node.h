@@ -94,6 +94,7 @@ private:
 
     // ROS Publishers
     ros::Publisher _received_commands_pub;
+    ros::Publisher _received_inspection_set_current_pub;
 
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
