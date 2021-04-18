@@ -1,7 +1,7 @@
 Language: Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
-AlignConsecutiveAssignments: false
+AlignConsecutiveAssignments: true
 AlignEscapedNewlines: DontAlign
 AlignOperands: true
 AlignTrailingComments: false
@@ -38,7 +38,7 @@ BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: false
 BreakConstructorInitializers: AfterColon
 BreakStringLiterals: false
-ColumnLimit: 100
+ColumnLimit: 120
 CommentPragmas: ''
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true

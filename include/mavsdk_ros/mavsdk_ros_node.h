@@ -17,6 +17,9 @@
 
 #include <mavsdk_ros/AlarmStatus.h>
 
+#include <mavsdk_ros/SetUploadAlarm.h>
+#include <mavsdk_ros/UploadAlarm.h>
+
 namespace mavsdk_ros {
 class MavsdkRosNode {
 public:
@@ -30,6 +33,9 @@ private:
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
 
+    bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request, mavsdk_ros::SetUploadAlarm::Response& response);
+    bool uploadAlarmCb(mavsdk_ros::UploadAlarm::Request& request, mavsdk_ros::UploadAlarm::Response& response);
+
     ros::NodeHandle _nh;
 
     std::shared_ptr<mavsdk::Mavsdk> _mavsdk;
@@ -41,6 +47,8 @@ private:
     std::shared_ptr<mavsdk::HLActionRoboticVehicle> _hl_action;
 
     // ROS Services
+    ros::ServiceServer _set_upload_alarm_srv;
+    ros::ServiceServer _upload_alarm_srv;
 
     // ROS Publishers
 

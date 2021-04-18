@@ -17,7 +17,7 @@ void MavsdkRosNode::alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg)
 {
     mavsdk::AlarmBase::AlarmStatus alarm_status;
     alarm_status.stamp_ms = msg->stamp.toNSec() * 1e-6;
-    alarm_status.index = msg->index;
+    alarm_status.index    = msg->index;
 
     if (msg->status == mavsdk_ros::AlarmStatus::OK)
         alarm_status.status = mavsdk::AlarmBase::AlarmStatusType::Ok;
@@ -27,7 +27,7 @@ void MavsdkRosNode::alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg)
         alarm_status.status = mavsdk::AlarmBase::AlarmStatusType::Error;
 
     alarm_status.errors_count = msg->errors_count;
-    alarm_status.warns_count = msg->warns_count;
+    alarm_status.warns_count  = msg->warns_count;
 
     _alarm->send_alarm_status(alarm_status);
 }
