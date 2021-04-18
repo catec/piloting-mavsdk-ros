@@ -53,10 +53,10 @@ bool MavsdkRosNode::init()
 
     initAlarm(target_system);
     initCommand(target_system);
+    initChecklist(target_system);
 
     _telemetry  = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
-    _checklist  = std::make_shared<mavsdk::ChecklistRoboticVehicle>(target_system);
     _hl_action  = std::make_shared<mavsdk::HLActionRoboticVehicle>(target_system);
 
     return true;
@@ -93,5 +93,14 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
 
         _received_commands_pub.publish(command_msg);
     });
+}
+
+void MavsdkRosNode::initChecklist(std::shared_ptr<mavsdk::System>& target_system)
+{
+    _checklist = std::make_shared<mavsdk::ChecklistRoboticVehicle>(target_system);
+
+    _set_upload_checklist_srv =
+        _nh.advertiseService("set_upload_checklist", &MavsdkRosNode::setUploadChecklistCb, this);
+    _upload_checklist_srv = _nh.advertiseService("upload_checklist", &MavsdkRosNode::uploadChecklistCb, this);
 }
 } // namespace mavsdk_ros

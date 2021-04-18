@@ -23,6 +23,8 @@
 // srvs
 #include <mavsdk_ros/SetUploadAlarm.h>
 #include <mavsdk_ros/UploadAlarm.h>
+#include <mavsdk_ros/SetUploadChecklist.h>
+#include <mavsdk_ros/UploadChecklist.h>
 
 namespace mavsdk_ros {
 class MavsdkRosNode {
@@ -35,12 +37,21 @@ public:
 private:
     void initAlarm(std::shared_ptr<mavsdk::System>& target_system);
     void initCommand(std::shared_ptr<mavsdk::System>& target_system);
+    void initChecklist(std::shared_ptr<mavsdk::System>& target_system);
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
     void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
 
-    bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request, mavsdk_ros::SetUploadAlarm::Response& response);
-    bool uploadAlarmCb(mavsdk_ros::UploadAlarm::Request& request, mavsdk_ros::UploadAlarm::Response& response);
+    // clang-format off
+    bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request,
+                          mavsdk_ros::SetUploadAlarm::Response& response);
+    bool uploadAlarmCb(mavsdk_ros::UploadAlarm::Request& request,
+                       mavsdk_ros::UploadAlarm::Response& response);
+    bool setUploadChecklistCb(mavsdk_ros::SetUploadChecklist::Request& request,
+                              mavsdk_ros::SetUploadChecklist::Response& response);
+    bool uploadChecklistCb(mavsdk_ros::UploadChecklist::Request& request,
+                           mavsdk_ros::UploadChecklist::Response& response);
+    // clang-format on
 
     ros::NodeHandle _nh;
 
@@ -55,6 +66,8 @@ private:
     // ROS Services
     ros::ServiceServer _set_upload_alarm_srv;
     ros::ServiceServer _upload_alarm_srv;
+    ros::ServiceServer _set_upload_checklist_srv;
+    ros::ServiceServer _upload_checklist_srv;
 
     // ROS Publishers
     ros::Publisher _received_commands_pub;

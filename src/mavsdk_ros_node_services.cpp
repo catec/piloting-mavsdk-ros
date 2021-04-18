@@ -68,4 +68,57 @@ bool MavsdkRosNode::uploadAlarmCb(
     return true;
 }
 
+bool MavsdkRosNode::setUploadChecklistCb(
+    mavsdk_ros::SetUploadChecklist::Request& request, mavsdk_ros::SetUploadChecklist::Response&)
+{
+    mavsdk::ChecklistBase::Checklist checklist_list;
+    for (auto checklist : request.checklist) {
+        mavsdk::ChecklistBase::ChecklistItem checklist_item;
+        checklist_item.index       = checklist.index;
+        checklist_item.name        = checklist.name;
+        checklist_item.description = checklist.description;
+        checklist_list.items.push_back(checklist_item);
+    }
+
+    _checklist->set_upload_checklist(checklist_list);
+
+    return true;
+}
+
+bool MavsdkRosNode::uploadChecklistCb(
+    mavsdk_ros::UploadChecklist::Request& request, mavsdk_ros::UploadChecklist::Response& response)
+{
+    mavsdk::ChecklistBase::Checklist checklist_list;
+    for (auto checklist : request.checklist) {
+        mavsdk::ChecklistBase::ChecklistItem checklist_item;
+        checklist_item.index       = checklist.index;
+        checklist_item.name        = checklist.name;
+        checklist_item.description = checklist.description;
+        checklist_list.items.push_back(checklist_item);
+    }
+
+    auto prom = std::make_shared<std::promise<std::pair<mavsdk::ChecklistBase::Result, mavsdk::ChecklistBase::Ack>>>();
+    auto future_result = prom->get_future();
+
+    _checklist->upload_checklist_async(
+        [prom](mavsdk::ChecklistBase::Result result, mavsdk::ChecklistBase::Ack ack) {
+            prom->set_value(std::make_pair<>(result, ack));
+        },
+        checklist_list);
+
+    const auto lambda_result             = future_result.get();
+    mavsdk::ChecklistBase::Result result = lambda_result.first;
+    mavsdk::ChecklistBase::Ack ack       = lambda_result.second;
+
+    std::stringstream ss;
+    ss << result << " - " << ack;
+    response.message = ss.str();
+
+    if (result != mavsdk::ChecklistBase::Result::Success)
+        response.success = false;
+
+    response.success = true;
+    return true;
+}
+
 } // namespace mavsdk_ros
