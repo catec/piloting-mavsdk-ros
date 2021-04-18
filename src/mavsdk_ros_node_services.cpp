@@ -294,4 +294,22 @@ bool MavsdkRosNode::downloadInspectionCb(
     return true;
 }
 
+bool MavsdkRosNode::updateCurrentInspectionItemCb(
+    mavsdk_ros::UpdateSeqInspectionItem::Request& request, mavsdk_ros::UpdateSeqInspectionItem::Response&)
+{
+    uint16_t item_seq = request.item_seq;
+    _inspection->update_current_inspection_item(item_seq);
+
+    return true;
+}
+
+bool MavsdkRosNode::updateReachedInspectionItemCb(
+    mavsdk_ros::UpdateSeqInspectionItem::Request& request, mavsdk_ros::UpdateSeqInspectionItem::Response&)
+{
+    uint16_t item_seq = request.item_seq;
+    _inspection->update_reached_inspection_item(item_seq);
+
+    return true;
+}
+
 } // namespace mavsdk_ros

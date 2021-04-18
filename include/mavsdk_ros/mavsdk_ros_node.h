@@ -30,6 +30,7 @@
 #include <mavsdk_ros/SetUploadInspection.h>
 #include <mavsdk_ros/UploadInspection.h>
 #include <mavsdk_ros/DownloadInspection.h>
+#include <mavsdk_ros/UpdateSeqInspectionItem.h>
 
 namespace mavsdk_ros {
 class MavsdkRosNode {
@@ -69,6 +70,10 @@ private:
                             mavsdk_ros::UploadInspection::Response& response);
     bool downloadInspectionCb(mavsdk_ros::DownloadInspection::Request& request,
                               mavsdk_ros::DownloadInspection::Response& response);
+    bool updateCurrentInspectionItemCb(mavsdk_ros::UpdateSeqInspectionItem::Request& request,
+                                       mavsdk_ros::UpdateSeqInspectionItem::Response& response);
+    bool updateReachedInspectionItemCb(mavsdk_ros::UpdateSeqInspectionItem::Request& request,
+                                       mavsdk_ros::UpdateSeqInspectionItem::Response& response);
     // clang-format on
 
     ros::NodeHandle _nh;
@@ -91,6 +96,8 @@ private:
     ros::ServiceServer _set_upload_inspection_srv;
     ros::ServiceServer _upload_inspection_srv;
     ros::ServiceServer _download_inspection_srv;
+    ros::ServiceServer _update_current_inspection_item_srv;
+    ros::ServiceServer _update_reached_inspection_item_srv;
 
     // ROS Publishers
     ros::Publisher _received_commands_pub;

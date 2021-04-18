@@ -125,10 +125,18 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
         _received_inspection_set_current_pub.publish(set_current_msg);
     });
 
+    // clang-format off
     _set_upload_inspection_srv =
         _nh.advertiseService("set_upload_inspection", &MavsdkRosNode::setUploadInspectionCb, this);
-    _upload_inspection_srv   = _nh.advertiseService("upload_inspection", &MavsdkRosNode::uploadInspectionCb, this);
-    _download_inspection_srv = _nh.advertiseService("download_inspection", &MavsdkRosNode::downloadInspectionCb, this);
+    _upload_inspection_srv =
+        _nh.advertiseService("upload_inspection", &MavsdkRosNode::uploadInspectionCb, this);
+    _download_inspection_srv =
+        _nh.advertiseService("download_inspection", &MavsdkRosNode::downloadInspectionCb, this);
+    _update_current_inspection_item_srv =
+        _nh.advertiseService("update_current_inspection_item", &MavsdkRosNode::updateCurrentInspectionItemCb, this);
+    _update_reached_inspection_item_srv =
+        _nh.advertiseService("update_reached_inspection_item", &MavsdkRosNode::updateReachedInspectionItemCb, this);
+    // clang-format on
 }
 
 void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system)
