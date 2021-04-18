@@ -41,6 +41,8 @@ private:
     void initCommand(std::shared_ptr<mavsdk::System>& target_system);
     void initChecklist(std::shared_ptr<mavsdk::System>& target_system);
     void initHLAction(std::shared_ptr<mavsdk::System>& target_system);
+    void initInspection(std::shared_ptr<mavsdk::System>& target_system);
+    void initTelemetry(std::shared_ptr<mavsdk::System>& target_system);
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
     void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);

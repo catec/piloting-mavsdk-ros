@@ -40,7 +40,7 @@ bool MavsdkRosNode::init()
     ros::Time begin = ros::Time::now();
     std::shared_ptr<mavsdk::System> target_system;
     while (!(target_system = _mavsdk->system(params.target_system_id))) {
-        ROS_INFO_THROTTLE(1, "No target system (%d) alive", params.target_system_id);
+        ROS_WARN_THROTTLE(1, "No target system (%d) alive", params.target_system_id);
 
         const double elapsed_time = (ros::Time::now() - begin).toSec();
         if (elapsed_time >= 30.0) {
@@ -55,9 +55,8 @@ bool MavsdkRosNode::init()
     initCommand(target_system);
     initChecklist(target_system);
     initHLAction(target_system);
-
-    _telemetry  = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
-    _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
+    initInspection(target_system);
+    initTelemetry(target_system);
 
     return true;
 }
@@ -110,6 +109,20 @@ void MavsdkRosNode::initHLAction(std::shared_ptr<mavsdk::System>& target_system)
 
     _set_upload_hl_action_srv = _nh.advertiseService("set_upload_hl_action", &MavsdkRosNode::setUploadHLActionCb, this);
     _upload_hl_action_srv     = _nh.advertiseService("upload_hl_action", &MavsdkRosNode::uploadHLActionCb, this);
+}
+
+void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_system)
+{
+    _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
+
+    // TODO
+}
+
+void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system)
+{
+    _telemetry = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
+
+    // TODO
 }
 
 } // namespace mavsdk_ros
