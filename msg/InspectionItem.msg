@@ -1,0 +1,9 @@
+uint16 command
+uint8 autocontinue
+float32 param1
+float32 param2
+float32 param3
+float32 param4
+float32 x
+float32 y
+float32 z

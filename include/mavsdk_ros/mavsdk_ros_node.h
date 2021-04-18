@@ -27,6 +27,8 @@
 #include <mavsdk_ros/UploadChecklist.h>
 #include <mavsdk_ros/SetUploadHLAction.h>
 #include <mavsdk_ros/UploadHLAction.h>
+#include <mavsdk_ros/SetUploadInspection.h>
+#include <mavsdk_ros/UploadInspection.h>
 
 namespace mavsdk_ros {
 class MavsdkRosNode {
@@ -60,6 +62,10 @@ private:
                              mavsdk_ros::SetUploadHLAction::Response& response);
     bool uploadHLActionCb(mavsdk_ros::UploadHLAction::Request& request,
                           mavsdk_ros::UploadHLAction::Response& response);
+    bool setUploadInspectionCb(mavsdk_ros::SetUploadInspection::Request& request,
+                               mavsdk_ros::SetUploadInspection::Response& response);
+    bool uploadInspectionCb(mavsdk_ros::UploadInspection::Request& request,
+                            mavsdk_ros::UploadInspection::Response& response);
     // clang-format on
 
     ros::NodeHandle _nh;
@@ -79,6 +85,8 @@ private:
     ros::ServiceServer _upload_checklist_srv;
     ros::ServiceServer _set_upload_hl_action_srv;
     ros::ServiceServer _upload_hl_action_srv;
+    ros::ServiceServer _set_upload_inspection_srv;
+    ros::ServiceServer _upload_inspection_srv;
 
     // ROS Publishers
     ros::Publisher _received_commands_pub;

@@ -115,7 +115,9 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
 {
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
 
-    // TODO
+    _set_upload_inspection_srv =
+        _nh.advertiseService("set_upload_inspection", &MavsdkRosNode::setUploadInspectionCb, this);
+    _upload_inspection_srv = _nh.advertiseService("upload_inspection", &MavsdkRosNode::uploadInspectionCb, this);
 }
 
 void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system)

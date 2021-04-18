@@ -176,4 +176,76 @@ bool MavsdkRosNode::uploadHLActionCb(
     return true;
 }
 
+bool MavsdkRosNode::setUploadInspectionCb(
+    mavsdk_ros::SetUploadInspection::Request& request, mavsdk_ros::SetUploadInspection::Response&)
+{
+    mavsdk::InspectionBase::InspectionPlan inspection_plan;
+    inspection_plan.mission_id = request.mission_id;
+
+    for (auto inspection_item : request.inspection_items) {
+        mavsdk::InspectionBase::InspectionItem inspection_item_base;
+        inspection_item_base.command      = inspection_item.command;
+        inspection_item_base.autocontinue = inspection_item.autocontinue;
+        inspection_item_base.param1       = inspection_item.param1;
+        inspection_item_base.param2       = inspection_item.param2;
+        inspection_item_base.param3       = inspection_item.param3;
+        inspection_item_base.param4       = inspection_item.param4;
+        inspection_item_base.x            = inspection_item.x;
+        inspection_item_base.y            = inspection_item.y;
+        inspection_item_base.z            = inspection_item.z;
+
+        inspection_plan.inspection_items.push_back(inspection_item_base);
+    }
+
+    _inspection->set_upload_inspection(inspection_plan);
+
+    return true;
+}
+
+bool MavsdkRosNode::uploadInspectionCb(
+    mavsdk_ros::UploadInspection::Request& request, mavsdk_ros::UploadInspection::Response& response)
+{
+    mavsdk::InspectionBase::InspectionPlan inspection_plan;
+    inspection_plan.mission_id = request.mission_id;
+
+    for (auto inspection_item : request.inspection_items) {
+        mavsdk::InspectionBase::InspectionItem inspection_item_base;
+        inspection_item_base.command      = inspection_item.command;
+        inspection_item_base.autocontinue = inspection_item.autocontinue;
+        inspection_item_base.param1       = inspection_item.param1;
+        inspection_item_base.param2       = inspection_item.param2;
+        inspection_item_base.param3       = inspection_item.param3;
+        inspection_item_base.param4       = inspection_item.param4;
+        inspection_item_base.x            = inspection_item.x;
+        inspection_item_base.y            = inspection_item.y;
+        inspection_item_base.z            = inspection_item.z;
+
+        inspection_plan.inspection_items.push_back(inspection_item_base);
+    }
+
+    auto prom =
+        std::make_shared<std::promise<std::pair<mavsdk::InspectionBase::Result, mavsdk::InspectionBase::Ack>>>();
+    auto future_result = prom->get_future();
+
+    _inspection->upload_inspection_async(
+        [prom](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::Ack ack) {
+            prom->set_value(std::make_pair<>(result, ack));
+        },
+        inspection_plan);
+
+    const auto lambda_result              = future_result.get();
+    mavsdk::InspectionBase::Result result = lambda_result.first;
+    mavsdk::InspectionBase::Ack ack       = lambda_result.second;
+
+    std::stringstream ss;
+    ss << result << " - " << ack;
+    response.message = ss.str();
+
+    if (result != mavsdk::InspectionBase::Result::Success)
+        response.success = false;
+
+    response.success = true;
+    return true;
+}
+
 } // namespace mavsdk_ros
