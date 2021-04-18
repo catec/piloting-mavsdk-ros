@@ -117,7 +117,8 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
 
     _set_upload_inspection_srv =
         _nh.advertiseService("set_upload_inspection", &MavsdkRosNode::setUploadInspectionCb, this);
-    _upload_inspection_srv = _nh.advertiseService("upload_inspection", &MavsdkRosNode::uploadInspectionCb, this);
+    _upload_inspection_srv   = _nh.advertiseService("upload_inspection", &MavsdkRosNode::uploadInspectionCb, this);
+    _download_inspection_srv = _nh.advertiseService("download_inspection", &MavsdkRosNode::downloadInspectionCb, this);
 }
 
 void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system)

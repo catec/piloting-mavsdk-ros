@@ -61,10 +61,11 @@ bool MavsdkRosNode::uploadAlarmCb(
     ss << result << " - " << ack;
     response.message = ss.str();
 
-    if (result != mavsdk::AlarmBase::Result::Success)
+    if (result == mavsdk::AlarmBase::Result::Success)
+        response.success = true;
+    else
         response.success = false;
 
-    response.success = true;
     return true;
 }
 
@@ -114,10 +115,11 @@ bool MavsdkRosNode::uploadChecklistCb(
     ss << result << " - " << ack;
     response.message = ss.str();
 
-    if (result != mavsdk::ChecklistBase::Result::Success)
+    if (result == mavsdk::ChecklistBase::Result::Success)
+        response.success = true;
+    else
         response.success = false;
 
-    response.success = true;
     return true;
 }
 
@@ -169,10 +171,11 @@ bool MavsdkRosNode::uploadHLActionCb(
     ss << result << " - " << ack;
     response.message = ss.str();
 
-    if (result != mavsdk::HLActionBase::Result::Success)
+    if (result == mavsdk::HLActionBase::Result::Success)
+        response.success = true;
+    else
         response.success = false;
 
-    response.success = true;
     return true;
 }
 
@@ -241,10 +244,53 @@ bool MavsdkRosNode::uploadInspectionCb(
     ss << result << " - " << ack;
     response.message = ss.str();
 
-    if (result != mavsdk::InspectionBase::Result::Success)
+    if (result == mavsdk::InspectionBase::Result::Success)
+        response.success = true;
+    else
         response.success = false;
 
-    response.success = true;
+    return true;
+}
+
+bool MavsdkRosNode::downloadInspectionCb(
+    mavsdk_ros::DownloadInspection::Request&, mavsdk_ros::DownloadInspection::Response& response)
+{
+    auto prom = std::make_shared<
+        std::promise<std::pair<mavsdk::InspectionBase::Result, mavsdk::InspectionBase::InspectionPlan>>>();
+    auto future_result = prom->get_future();
+
+    _inspection->download_inspection_async(
+        [prom](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::InspectionPlan inspection_plan) {
+            prom->set_value(std::make_pair<>(result, inspection_plan));
+        });
+
+    const auto lambda_result                               = future_result.get();
+    mavsdk::InspectionBase::Result result                  = lambda_result.first;
+    mavsdk::InspectionBase::InspectionPlan inspection_plan = lambda_result.second;
+
+    std::stringstream ss;
+    ss << result;
+    response.message = ss.str();
+
+    if (result == mavsdk::InspectionBase::Result::Success) {
+        response.success    = true;
+        response.mission_id = inspection_plan.mission_id;
+        for (auto inspection_item_base : inspection_plan.inspection_items) {
+            mavsdk_ros::InspectionItem inspection_item;
+            inspection_item.command      = inspection_item_base.command;
+            inspection_item.autocontinue = inspection_item_base.autocontinue;
+            inspection_item.param1       = inspection_item_base.param1;
+            inspection_item.param2       = inspection_item_base.param2;
+            inspection_item.param3       = inspection_item_base.param3;
+            inspection_item.param4       = inspection_item_base.param4;
+            inspection_item.x            = inspection_item_base.x;
+            inspection_item.y            = inspection_item_base.y;
+            inspection_item.z            = inspection_item_base.z;
+            response.inspection_items.push_back(inspection_item);
+        }
+    } else
+        response.success = false;
+
     return true;
 }
 
