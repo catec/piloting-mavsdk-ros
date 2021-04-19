@@ -69,8 +69,14 @@ void MavsdkRosNode::initAlarm(std::shared_ptr<mavsdk::System>& target_system)
 
     _alarm_status_sub = _nh.subscribe<mavsdk_ros::AlarmStatus>("alarm_status", 10, &MavsdkRosNode::alarmStatusCb, this);
 
+    mavsdk::AlarmBase::AlarmList alarm_list_empty;
+    _alarm->upload_alarm_async(
+        [&](mavsdk::AlarmBase::Result result, mavsdk::AlarmBase::Ack ack) {
+            ROS_INFO_STREAM("Alarm upload callback. Result [" << result << "] Ack [" << ack << "]");
+        },
+        alarm_list_empty);
+
     _set_upload_alarm_srv = _nh.advertiseService("set_upload_alarm", &MavsdkRosNode::setUploadAlarmCb, this);
-    _upload_alarm_srv     = _nh.advertiseService("upload_alarm", &MavsdkRosNode::uploadAlarmCb, this);
 }
 
 void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
@@ -102,15 +108,30 @@ void MavsdkRosNode::initChecklist(std::shared_ptr<mavsdk::System>& target_system
 
     _set_upload_checklist_srv =
         _nh.advertiseService("set_upload_checklist", &MavsdkRosNode::setUploadChecklistCb, this);
-    _upload_checklist_srv = _nh.advertiseService("upload_checklist", &MavsdkRosNode::uploadChecklistCb, this);
+
+    mavsdk::ChecklistBase::Checklist checklist_list_empty;
+    _checklist->upload_checklist_async(
+        [&](mavsdk::ChecklistBase::Result result, mavsdk::ChecklistBase::Ack ack) {
+            ROS_INFO_STREAM("Checklist upload callback. Result [" << result << "] Ack [" << ack << "]");
+        },
+        checklist_list_empty);
+
+    _set_upload_checklist_srv =
+        _nh.advertiseService("set_upload_checklist", &MavsdkRosNode::setUploadChecklistCb, this);
 }
 
 void MavsdkRosNode::initHLAction(std::shared_ptr<mavsdk::System>& target_system)
 {
     _hl_action = std::make_shared<mavsdk::HLActionRoboticVehicle>(target_system);
 
+    mavsdk::HLActionBase::HLActionList hl_action_list_empty;
+    _hl_action->upload_hl_action_async(
+        [&](mavsdk::HLActionBase::Result result, mavsdk::HLActionBase::Ack ack) {
+            ROS_INFO_STREAM("HLAction upload callback. Result [" << result << "] Ack [" << ack << "]");
+        },
+        hl_action_list_empty);
+
     _set_upload_hl_action_srv = _nh.advertiseService("set_upload_hl_action", &MavsdkRosNode::setUploadHLActionCb, this);
-    _upload_hl_action_srv     = _nh.advertiseService("upload_hl_action", &MavsdkRosNode::uploadHLActionCb, this);
 }
 
 void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_system)
@@ -118,6 +139,8 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
 
     _received_inspection_set_current_pub = _nh.advertise<std_msgs::UInt16>("inspection_set_current", 10);
+    _downloaded_inspection_plan_pub      = _nh.advertise<mavsdk_ros::InspectionPlan>("inspection_plan", 10, true);
+
     _inspection->subscribe_inspection_set_current([&](uint16_t seq) {
         std_msgs::UInt16 set_current_msg;
         set_current_msg.data = seq;
@@ -125,13 +148,43 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
         _received_inspection_set_current_pub.publish(set_current_msg);
     });
 
+    mavsdk::InspectionBase::InspectionPlan inspection_plan_emtpy;
+    _inspection->upload_inspection_async(
+        [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::Ack ack) {
+            ROS_INFO_STREAM("Inspection upload callback. Result [" << result << "] Ack [" << ack << "]");
+        },
+        inspection_plan_emtpy);
+
+    _inspection->download_inspection_async(
+        [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::InspectionPlan inspection_plan) {
+            ROS_INFO_STREAM(
+                "Inspection download callback. Result [" << result << "] Inspection Plan Size ["
+                                                         << inspection_plan.inspection_items.size() << "]");
+
+            if (result == mavsdk::InspectionBase::Result::Success) {
+                mavsdk_ros::InspectionPlan inspection_plan_msg;
+                inspection_plan_msg.mission_id = inspection_plan.mission_id;
+                for (auto inspection_item_base : inspection_plan.inspection_items) {
+                    mavsdk_ros::InspectionItem inspection_item;
+                    inspection_item.command      = inspection_item_base.command;
+                    inspection_item.autocontinue = inspection_item_base.autocontinue;
+                    inspection_item.param1       = inspection_item_base.param1;
+                    inspection_item.param2       = inspection_item_base.param2;
+                    inspection_item.param3       = inspection_item_base.param3;
+                    inspection_item.param4       = inspection_item_base.param4;
+                    inspection_item.x            = inspection_item_base.x;
+                    inspection_item.y            = inspection_item_base.y;
+                    inspection_item.z            = inspection_item_base.z;
+                    inspection_plan_msg.inspection_items.push_back(inspection_item);
+                }
+
+                _downloaded_inspection_plan_pub.publish(inspection_plan_msg);
+            }
+        });
+
     // clang-format off
     _set_upload_inspection_srv =
         _nh.advertiseService("set_upload_inspection", &MavsdkRosNode::setUploadInspectionCb, this);
-    _upload_inspection_srv =
-        _nh.advertiseService("upload_inspection", &MavsdkRosNode::uploadInspectionCb, this);
-    _download_inspection_srv =
-        _nh.advertiseService("download_inspection", &MavsdkRosNode::downloadInspectionCb, this);
     _update_current_inspection_item_srv =
         _nh.advertiseService("update_current_inspection_item", &MavsdkRosNode::updateCurrentInspectionItemCb, this);
     _update_reached_inspection_item_srv =

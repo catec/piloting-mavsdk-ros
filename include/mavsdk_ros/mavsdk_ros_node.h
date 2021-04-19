@@ -19,17 +19,13 @@
 #include <mavsdk_ros/AlarmStatus.h>
 #include <mavsdk_ros/CommandLong.h>
 #include <mavsdk_ros/CommandAck.h>
+#include <mavsdk_ros/InspectionPlan.h>
 
 // srvs
 #include <mavsdk_ros/SetUploadAlarm.h>
-#include <mavsdk_ros/UploadAlarm.h>
 #include <mavsdk_ros/SetUploadChecklist.h>
-#include <mavsdk_ros/UploadChecklist.h>
 #include <mavsdk_ros/SetUploadHLAction.h>
-#include <mavsdk_ros/UploadHLAction.h>
 #include <mavsdk_ros/SetUploadInspection.h>
-#include <mavsdk_ros/UploadInspection.h>
-#include <mavsdk_ros/DownloadInspection.h>
 #include <mavsdk_ros/UpdateSeqInspectionItem.h>
 
 namespace mavsdk_ros {
@@ -54,22 +50,12 @@ private:
     // clang-format off
     bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request,
                           mavsdk_ros::SetUploadAlarm::Response& response);
-    bool uploadAlarmCb(mavsdk_ros::UploadAlarm::Request& request,
-                       mavsdk_ros::UploadAlarm::Response& response);
     bool setUploadChecklistCb(mavsdk_ros::SetUploadChecklist::Request& request,
                               mavsdk_ros::SetUploadChecklist::Response& response);
-    bool uploadChecklistCb(mavsdk_ros::UploadChecklist::Request& request,
-                           mavsdk_ros::UploadChecklist::Response& response);
     bool setUploadHLActionCb(mavsdk_ros::SetUploadHLAction::Request& request,
                              mavsdk_ros::SetUploadHLAction::Response& response);
-    bool uploadHLActionCb(mavsdk_ros::UploadHLAction::Request& request,
-                          mavsdk_ros::UploadHLAction::Response& response);
     bool setUploadInspectionCb(mavsdk_ros::SetUploadInspection::Request& request,
                                mavsdk_ros::SetUploadInspection::Response& response);
-    bool uploadInspectionCb(mavsdk_ros::UploadInspection::Request& request,
-                            mavsdk_ros::UploadInspection::Response& response);
-    bool downloadInspectionCb(mavsdk_ros::DownloadInspection::Request& request,
-                              mavsdk_ros::DownloadInspection::Response& response);
     bool updateCurrentInspectionItemCb(mavsdk_ros::UpdateSeqInspectionItem::Request& request,
                                        mavsdk_ros::UpdateSeqInspectionItem::Response& response);
     bool updateReachedInspectionItemCb(mavsdk_ros::UpdateSeqInspectionItem::Request& request,
@@ -88,20 +74,16 @@ private:
 
     // ROS Services
     ros::ServiceServer _set_upload_alarm_srv;
-    ros::ServiceServer _upload_alarm_srv;
     ros::ServiceServer _set_upload_checklist_srv;
-    ros::ServiceServer _upload_checklist_srv;
     ros::ServiceServer _set_upload_hl_action_srv;
-    ros::ServiceServer _upload_hl_action_srv;
     ros::ServiceServer _set_upload_inspection_srv;
-    ros::ServiceServer _upload_inspection_srv;
-    ros::ServiceServer _download_inspection_srv;
     ros::ServiceServer _update_current_inspection_item_srv;
     ros::ServiceServer _update_reached_inspection_item_srv;
 
     // ROS Publishers
     ros::Publisher _received_commands_pub;
     ros::Publisher _received_inspection_set_current_pub;
+    ros::Publisher _downloaded_inspection_plan_pub;
 
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;

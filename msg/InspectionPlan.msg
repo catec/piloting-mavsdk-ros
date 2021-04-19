@@ -1,0 +1,2 @@
+uint16 mission_id
+InspectionItem[] inspection_items
