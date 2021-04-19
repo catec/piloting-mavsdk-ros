@@ -71,9 +71,9 @@ bool MavsdkRosNode::setUploadInspectionCb(
     mavsdk_ros::SetUploadInspection::Request& request, mavsdk_ros::SetUploadInspection::Response&)
 {
     mavsdk::InspectionBase::InspectionPlan inspection_plan;
-    inspection_plan.mission_id = request.mission_id;
+    inspection_plan.mission_id = request.inspection_plan.mission_id;
 
-    for (auto inspection_item : request.inspection_items) {
+    for (auto inspection_item : request.inspection_plan.inspection_items) {
         mavsdk::InspectionBase::InspectionItem inspection_item_base;
         inspection_item_base.command      = inspection_item.command;
         inspection_item_base.autocontinue = inspection_item.autocontinue;
