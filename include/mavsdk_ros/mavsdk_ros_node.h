@@ -14,6 +14,7 @@
 #include <ros/ros.h>
 
 #include <mavsdk_ros/mavsdk_include.h>
+#include <mavsdk_ros/parameters.h>
 
 // msgs
 #include <mavsdk_ros/AlarmStatus.h>
@@ -27,6 +28,12 @@
 #include <mavsdk_ros/SetUploadHLAction.h>
 #include <mavsdk_ros/SetUploadInspection.h>
 #include <mavsdk_ros/UpdateSeqInspectionItem.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 
 namespace mavsdk_ros {
 class MavsdkRosNode {
@@ -46,6 +53,7 @@ private:
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
     void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
+    void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose, const geometry_msgs::TwistStamped::ConstPtr& velocity);
 
     // clang-format off
     bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request,
@@ -63,6 +71,7 @@ private:
     // clang-format on
 
     ros::NodeHandle _nh;
+    Parameters _params;
 
     std::shared_ptr<mavsdk::Mavsdk> _mavsdk;
     std::shared_ptr<mavsdk::TelemetryRoboticVehicle> _telemetry;
@@ -88,5 +97,10 @@ private:
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
     ros::Subscriber _commands_ack_sub;
+    message_filters::Subscriber<geometry_msgs::PoseStamped> _pose_sub;
+    message_filters::Subscriber<geometry_msgs::TwistStamped> _vel_sub;
+    typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::PoseStamped, geometry_msgs::TwistStamped> MySyncPolicy;
+    typedef message_filters::Synchronizer<MySyncPolicy> Sync;
+    std::shared_ptr<Sync> _sync;
 };
 } // namespace mavsdk_ros

@@ -9,8 +9,6 @@
  *  Copyright (c) 2021, FADA-CATEC
  */
 
-#include <mavsdk_ros/parameters.h>
-
 #include <std_msgs/UInt16.h>
 
 #include <mavsdk_ros/mavsdk_ros_node.h>
@@ -21,32 +19,33 @@ MavsdkRosNode::~MavsdkRosNode() {}
 
 bool MavsdkRosNode::init()
 {
-    Parameters params;
-
     _mavsdk = std::make_shared<mavsdk::Mavsdk>();
     mavsdk::Mavsdk::Configuration config(
-        params.local_system_id,
-        params.local_component_id,
+        _params.local_system_id,
+        _params.local_component_id,
         false,
         mavsdk::Mavsdk::Configuration::UsageType::RoboticVehicle);
     _mavsdk->set_configuration(config);
 
     const auto connection_result =
-        _mavsdk->setup_udp_connection(params.local_ip, params.local_port, params.target_ip, params.target_port);
+        _mavsdk->setup_udp_connection(_params.local_ip, _params.local_port, _params.target_ip, _params.target_port);
 
     if (connection_result != mavsdk::ConnectionResult::Success) {
         ROS_ERROR("MAVSDK connection error. Terminating...");
         return false;
     }
 
+    // Sleep to let simulation time work
+    ros::Duration(1.0).sleep();
+
     ros::Time begin = ros::Time::now();
     std::shared_ptr<mavsdk::System> target_system;
-    while (!(target_system = _mavsdk->system(params.target_system_id))) {
-        ROS_WARN_THROTTLE(1, "No target system (%d) alive", params.target_system_id);
+    while (!(target_system = _mavsdk->system(_params.target_system_id))) {
+        ROS_WARN_THROTTLE(1, "No target system (%d) alive", _params.target_system_id);
 
-        const double elapsed_time = (ros::Time::now() - begin).toSec();
+        double elapsed_time = (ros::Time::now() - begin).toSec();
         if (elapsed_time >= 30.0) {
-            ROS_ERROR("No target system (%d) found in 30 seconds. Terminating...");
+            ROS_ERROR("No target system (%d) found in %.2f seconds. Terminating...", _params.target_system_id, elapsed_time);
             return false;
         }
 
@@ -196,7 +195,12 @@ void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system
 {
     _telemetry = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
 
-    // TODO
+    ros::NodeHandle n;
+
+    _pose_sub.subscribe(n, "mavros/local_position/pose", 1);
+    _vel_sub.subscribe(n, "mavros/local_position/velocity_local", 1);
+    _sync.reset(new Sync(MySyncPolicy(10), _pose_sub, _vel_sub));
+    _sync->registerCallback(boost::bind(&MavsdkRosNode::telemetryCb, this, _1, _2));
 }
 
 } // namespace mavsdk_ros
