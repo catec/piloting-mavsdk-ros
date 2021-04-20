@@ -53,7 +53,7 @@ private:
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
     void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
-    void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose, const geometry_msgs::TwistStamped::ConstPtr& velocity);
+    void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose_msg, const geometry_msgs::TwistStamped::ConstPtr& velocity_msg);
 
     // clang-format off
     bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request,
