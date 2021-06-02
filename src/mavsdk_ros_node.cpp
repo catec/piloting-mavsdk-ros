@@ -138,7 +138,7 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
 
     _received_inspection_set_current_pub = _nh.advertise<std_msgs::UInt16>("inspection_set_current", 10);
-    _downloaded_inspection_plan_pub      = _nh.advertise<mavsdk_ros::InspectionPlan>("inspection_plan", 10, true);
+    _downloaded_inspection_wp_list_pub = _nh.advertise<mavsdk_ros::WaypointList>("inspection_wp_list", 10, true);
 
     _inspection->subscribe_inspection_set_current([&](uint16_t seq) {
         std_msgs::UInt16 set_current_msg;
@@ -147,47 +147,47 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
         _received_inspection_set_current_pub.publish(set_current_msg);
     });
 
-    mavsdk::InspectionBase::InspectionPlan inspection_plan_emtpy;
+    mavsdk::InspectionBase::WaypointList waypoint_list_emtpy;
     _inspection->upload_inspection_async(
         [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::Ack ack) {
             ROS_INFO_STREAM("Inspection upload callback. Result [" << result << "] Ack [" << ack << "]");
         },
-        inspection_plan_emtpy);
+        waypoint_list_emtpy);
 
     _inspection->download_inspection_async(
-        [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::InspectionPlan inspection_plan) {
+        [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::WaypointList waypoint_list) {
             ROS_INFO_STREAM(
-                "Inspection download callback. Result [" << result << "] Inspection Plan Size ["
-                                                         << inspection_plan.inspection_items.size() << "]");
+                "Inspection download callback. Result [" << result << "] Waypoint list size ["
+                                                         << waypoint_list.items.size() << "]");
 
             if (result == mavsdk::InspectionBase::Result::Success) {
-                mavsdk_ros::InspectionPlan inspection_plan_msg;
-                inspection_plan_msg.mission_id = inspection_plan.mission_id;
-                for (auto inspection_item_base : inspection_plan.inspection_items) {
-                    mavsdk_ros::InspectionItem inspection_item;
-                    inspection_item.command      = inspection_item_base.command;
-                    inspection_item.autocontinue = inspection_item_base.autocontinue;
-                    inspection_item.param1       = inspection_item_base.param1;
-                    inspection_item.param2       = inspection_item_base.param2;
-                    inspection_item.param3       = inspection_item_base.param3;
-                    inspection_item.param4       = inspection_item_base.param4;
-                    inspection_item.x            = inspection_item_base.x;
-                    inspection_item.y            = inspection_item_base.y;
-                    inspection_item.z            = inspection_item_base.z;
-                    inspection_plan_msg.inspection_items.push_back(inspection_item);
+                mavsdk_ros::WaypointList waypoint_list_msg;
+                for (auto waypoint_item_base : waypoint_list.items) {
+                    mavsdk_ros::WaypointItem waypoint_item;
+                    waypoint_item.task_id      = waypoint_item_base.task_id;
+                    waypoint_item.command      = waypoint_item_base.command;
+                    waypoint_item.autocontinue = waypoint_item_base.autocontinue;
+                    waypoint_item.param1       = waypoint_item_base.param1;
+                    waypoint_item.param2       = waypoint_item_base.param2;
+                    waypoint_item.param3       = waypoint_item_base.param3;
+                    waypoint_item.param4       = waypoint_item_base.param4;
+                    waypoint_item.x            = waypoint_item_base.x;
+                    waypoint_item.y            = waypoint_item_base.y;
+                    waypoint_item.z            = waypoint_item_base.z;
+                    waypoint_list_msg.items.push_back(waypoint_item);
                 }
 
-                _downloaded_inspection_plan_pub.publish(inspection_plan_msg);
+                _downloaded_inspection_wp_list_pub.publish(waypoint_list_msg);
             }
         });
 
     // clang-format off
-    _set_upload_inspection_srv =
-        _nh.advertiseService("set_upload_inspection", &MavsdkRosNode::setUploadInspectionCb, this);
-    _update_current_inspection_item_srv =
-        _nh.advertiseService("update_current_inspection_item", &MavsdkRosNode::updateCurrentInspectionItemCb, this);
-    _update_reached_inspection_item_srv =
-        _nh.advertiseService("update_reached_inspection_item", &MavsdkRosNode::updateReachedInspectionItemCb, this);
+    _set_upload_waypoint_list_srv =
+        _nh.advertiseService("set_upload_waypoint_list", &MavsdkRosNode::setUploadWaypointListCb, this);
+    _update_current_waypoint_item_srv =
+        _nh.advertiseService("update_current_waypoint_item", &MavsdkRosNode::updateCurrentWaypointItemCb, this);
+    _update_reached_waypoint_item_srv =
+        _nh.advertiseService("update_reached_waypoint_item", &MavsdkRosNode::updateReachedWaypointItemCb, this);
     // clang-format on
 }
 

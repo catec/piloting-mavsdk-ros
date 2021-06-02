@@ -67,34 +67,34 @@ bool MavsdkRosNode::setUploadHLActionCb(
     return true;
 }
 
-bool MavsdkRosNode::setUploadInspectionCb(
-    mavsdk_ros::SetUploadInspection::Request& request, mavsdk_ros::SetUploadInspection::Response&)
+bool MavsdkRosNode::setUploadWaypointListCb(
+    mavsdk_ros::SetUploadWaypointList::Request& request, mavsdk_ros::SetUploadWaypointList::Response&)
 {
-    mavsdk::InspectionBase::InspectionPlan inspection_plan;
-    inspection_plan.mission_id = request.inspection_plan.mission_id;
+    mavsdk::InspectionBase::WaypointList waypoint_list;
 
-    for (auto inspection_item : request.inspection_plan.inspection_items) {
-        mavsdk::InspectionBase::InspectionItem inspection_item_base;
-        inspection_item_base.command      = inspection_item.command;
-        inspection_item_base.autocontinue = inspection_item.autocontinue;
-        inspection_item_base.param1       = inspection_item.param1;
-        inspection_item_base.param2       = inspection_item.param2;
-        inspection_item_base.param3       = inspection_item.param3;
-        inspection_item_base.param4       = inspection_item.param4;
-        inspection_item_base.x            = inspection_item.x;
-        inspection_item_base.y            = inspection_item.y;
-        inspection_item_base.z            = inspection_item.z;
+    for (auto waypoint_item : request.waypoint_list.items) {
+        mavsdk::InspectionBase::WaypointItem waypoint_item_base;
+        waypoint_item_base.task_id      = waypoint_item.task_id;
+        waypoint_item_base.command      = waypoint_item.command;
+        waypoint_item_base.autocontinue = waypoint_item.autocontinue;
+        waypoint_item_base.param1       = waypoint_item.param1;
+        waypoint_item_base.param2       = waypoint_item.param2;
+        waypoint_item_base.param3       = waypoint_item.param3;
+        waypoint_item_base.param4       = waypoint_item.param4;
+        waypoint_item_base.x            = waypoint_item.x;
+        waypoint_item_base.y            = waypoint_item.y;
+        waypoint_item_base.z            = waypoint_item.z;
 
-        inspection_plan.inspection_items.push_back(inspection_item_base);
+        waypoint_list.items.push_back(waypoint_item_base);
     }
 
-    _inspection->set_upload_inspection(inspection_plan);
+    _inspection->set_upload_inspection(waypoint_list);
 
     return true;
 }
 
-bool MavsdkRosNode::updateCurrentInspectionItemCb(
-    mavsdk_ros::UpdateSeqInspectionItem::Request& request, mavsdk_ros::UpdateSeqInspectionItem::Response&)
+bool MavsdkRosNode::updateCurrentWaypointItemCb(
+    mavsdk_ros::UpdateSeqWaypointItem::Request& request, mavsdk_ros::UpdateSeqWaypointItem::Response&)
 {
     uint16_t item_seq = request.item_seq;
     _inspection->update_current_inspection_item(item_seq);
@@ -102,8 +102,8 @@ bool MavsdkRosNode::updateCurrentInspectionItemCb(
     return true;
 }
 
-bool MavsdkRosNode::updateReachedInspectionItemCb(
-    mavsdk_ros::UpdateSeqInspectionItem::Request& request, mavsdk_ros::UpdateSeqInspectionItem::Response&)
+bool MavsdkRosNode::updateReachedWaypointItemCb(
+    mavsdk_ros::UpdateSeqWaypointItem::Request& request, mavsdk_ros::UpdateSeqWaypointItem::Response&)
 {
     uint16_t item_seq = request.item_seq;
     _inspection->update_reached_inspection_item(item_seq);

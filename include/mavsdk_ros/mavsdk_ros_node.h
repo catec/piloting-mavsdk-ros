@@ -20,14 +20,14 @@
 #include <mavsdk_ros/AlarmStatus.h>
 #include <mavsdk_ros/CommandLong.h>
 #include <mavsdk_ros/CommandAck.h>
-#include <mavsdk_ros/InspectionPlan.h>
+#include <mavsdk_ros/WaypointList.h>
 
 // srvs
 #include <mavsdk_ros/SetUploadAlarm.h>
 #include <mavsdk_ros/SetUploadChecklist.h>
 #include <mavsdk_ros/SetUploadHLAction.h>
-#include <mavsdk_ros/SetUploadInspection.h>
-#include <mavsdk_ros/UpdateSeqInspectionItem.h>
+#include <mavsdk_ros/SetUploadWaypointList.h>
+#include <mavsdk_ros/UpdateSeqWaypointItem.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -62,12 +62,12 @@ private:
                               mavsdk_ros::SetUploadChecklist::Response& response);
     bool setUploadHLActionCb(mavsdk_ros::SetUploadHLAction::Request& request,
                              mavsdk_ros::SetUploadHLAction::Response& response);
-    bool setUploadInspectionCb(mavsdk_ros::SetUploadInspection::Request& request,
-                               mavsdk_ros::SetUploadInspection::Response& response);
-    bool updateCurrentInspectionItemCb(mavsdk_ros::UpdateSeqInspectionItem::Request& request,
-                                       mavsdk_ros::UpdateSeqInspectionItem::Response& response);
-    bool updateReachedInspectionItemCb(mavsdk_ros::UpdateSeqInspectionItem::Request& request,
-                                       mavsdk_ros::UpdateSeqInspectionItem::Response& response);
+    bool setUploadWaypointListCb(mavsdk_ros::SetUploadWaypointList::Request& request,
+                                 mavsdk_ros::SetUploadWaypointList::Response& response);
+    bool updateCurrentWaypointItemCb(mavsdk_ros::UpdateSeqWaypointItem::Request& request,
+                                     mavsdk_ros::UpdateSeqWaypointItem::Response& response);
+    bool updateReachedWaypointItemCb(mavsdk_ros::UpdateSeqWaypointItem::Request& request,
+                                     mavsdk_ros::UpdateSeqWaypointItem::Response& response);
     // clang-format on
 
     ros::NodeHandle _nh;
@@ -85,14 +85,14 @@ private:
     ros::ServiceServer _set_upload_alarm_srv;
     ros::ServiceServer _set_upload_checklist_srv;
     ros::ServiceServer _set_upload_hl_action_srv;
-    ros::ServiceServer _set_upload_inspection_srv;
-    ros::ServiceServer _update_current_inspection_item_srv;
-    ros::ServiceServer _update_reached_inspection_item_srv;
+    ros::ServiceServer _set_upload_waypoint_list_srv;
+    ros::ServiceServer _update_current_waypoint_item_srv;
+    ros::ServiceServer _update_reached_waypoint_item_srv;
 
     // ROS Publishers
     ros::Publisher _received_commands_pub;
     ros::Publisher _received_inspection_set_current_pub;
-    ros::Publisher _downloaded_inspection_plan_pub;
+    ros::Publisher _downloaded_inspection_wp_list_pub;
 
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
