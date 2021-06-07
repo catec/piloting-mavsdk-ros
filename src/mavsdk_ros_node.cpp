@@ -104,10 +104,7 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
 void MavsdkRosNode::initChecklist(std::shared_ptr<mavsdk::System>& target_system)
 {
     _checklist = std::make_shared<mavsdk::ChecklistRoboticVehicle>(target_system);
-
-    _set_upload_checklist_srv =
-        _nh.advertiseService("set_upload_checklist", &MavsdkRosNode::setUploadChecklistCb, this);
-
+    
     mavsdk::ChecklistBase::Checklist checklist_list_empty;
     _checklist->upload_checklist_async(
         [&](mavsdk::ChecklistBase::Result result, mavsdk::ChecklistBase::Ack ack) {
