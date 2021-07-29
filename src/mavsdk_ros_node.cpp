@@ -192,6 +192,8 @@ void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system
 {
     _telemetry = std::make_shared<mavsdk::TelemetryRoboticVehicle>(target_system);
 
+    _text_status_sub = _nh.subscribe<mavsdk_ros::TextStatus>("text_status", 10, &MavsdkRosNode::textStatusCb, this);
+
     ros::NodeHandle n;
 
     _pose_sub.subscribe(n, "mavros/local_position/pose", 1);

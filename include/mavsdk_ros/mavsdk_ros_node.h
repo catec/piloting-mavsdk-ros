@@ -21,6 +21,7 @@
 #include <mavsdk_ros/CommandLong.h>
 #include <mavsdk_ros/CommandAck.h>
 #include <mavsdk_ros/WaypointList.h>
+#include <mavsdk_ros/TextStatus.h>
 
 // srvs
 #include <mavsdk_ros/SetUploadAlarm.h>
@@ -54,7 +55,8 @@ private:
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
     void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
     void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose_msg, const geometry_msgs::TwistStamped::ConstPtr& velocity_msg);
-
+    void textStatusCb(const mavsdk_ros::TextStatus::ConstPtr& msg);
+    
     // clang-format off
     bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request,
                           mavsdk_ros::SetUploadAlarm::Response& response);
@@ -97,6 +99,7 @@ private:
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
     ros::Subscriber _commands_ack_sub;
+    ros::Subscriber _text_status_sub;
     message_filters::Subscriber<geometry_msgs::PoseStamped> _pose_sub;
     message_filters::Subscriber<geometry_msgs::TwistStamped> _vel_sub;
     typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::PoseStamped, geometry_msgs::TwistStamped> MySyncPolicy;

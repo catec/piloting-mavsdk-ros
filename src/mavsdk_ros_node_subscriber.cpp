@@ -73,4 +73,20 @@ void MavsdkRosNode::telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose
     _telemetry->send_attitude(vehicle_attitude);
 }
 
+void MavsdkRosNode::textStatusCb(const mavsdk_ros::TextStatus::ConstPtr& msg)
+{
+    mavsdk::TelemetryBase::TextStatus text_status;
+
+    if (msg->type == mavsdk_ros::TextStatus::INFO)
+        text_status.type = mavsdk::TelemetryBase::TextStatusType::Info;
+    else if (msg->type == mavsdk_ros::TextStatus::WARNING)
+        text_status.type = mavsdk::TelemetryBase::TextStatusType::Warning;
+    else
+        text_status.type = mavsdk::TelemetryBase::TextStatusType::Error;
+
+    text_status.text = msg->text;
+
+    _telemetry->send_text_status(text_status);
+}
+
 } // namespace mavsdk_ros
