@@ -154,11 +154,12 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
     _inspection->download_inspection_async(
         [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::WaypointList waypoint_list) {
             ROS_INFO_STREAM(
-                "Inspection download callback. Result [" << result << "] Waypoint list size ["
+                "Inspection download callback. Result [" << result << "] Plan ID [" << waypoint_list.plan_id << "] Waypoint list size ["
                                                          << waypoint_list.items.size() << "]");
 
             if (result == mavsdk::InspectionBase::Result::Success) {
                 mavsdk_ros::WaypointList waypoint_list_msg;
+                waypoint_list_msg.plan_id = waypoint_list.plan_id;
                 for (auto waypoint_item_base : waypoint_list.items) {
                     mavsdk_ros::WaypointItem waypoint_item;
                     waypoint_item.task_id      = waypoint_item_base.task_id;
