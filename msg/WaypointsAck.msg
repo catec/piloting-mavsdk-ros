@@ -1,1 +1,1 @@
-uint8 ack
+uint8 data

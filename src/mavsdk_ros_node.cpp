@@ -93,25 +93,25 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
 
         bool srv_exists = ros::service::exists("command", false);
         if (srv_exists) {
-            mavsdk_ros::CommandLong command_long;
-            command_long.command      = cmd.command;
-            command_long.confirmation = cmd.confirmation;
-            command_long.param1       = cmd.params.param1;
-            command_long.param2       = cmd.params.param2;
-            command_long.param3       = cmd.params.param3;
-            command_long.param4       = cmd.params.param4;
-            command_long.param5       = cmd.params.param5;
-            command_long.param6       = cmd.params.param6;
-            command_long.param7       = cmd.params.param7;
+            mavsdk_ros::CommandLong command_long_msg;
+            command_long_msg.command      = cmd.command;
+            command_long_msg.confirmation = cmd.confirmation;
+            command_long_msg.param1       = cmd.params.param1;
+            command_long_msg.param2       = cmd.params.param2;
+            command_long_msg.param3       = cmd.params.param3;
+            command_long_msg.param4       = cmd.params.param4;
+            command_long_msg.param5       = cmd.params.param5;
+            command_long_msg.param6       = cmd.params.param6;
+            command_long_msg.param7       = cmd.params.param7;
 
             ros::ServiceClient command_srv = _nh.serviceClient<mavsdk_ros::Command>("command");
-            mavsdk_ros::Command command_srv_data;
-            command_srv_data.request.info = command_long;
+            mavsdk_ros::Command cmd_srv_data;
+            cmd_srv_data.request.info = command_long_msg;
 
-            if (command_srv.call(command_srv_data)) {
-                command_ack.result        = command_srv_data.response.ack.result;
-                command_ack.progress      = command_srv_data.response.ack.progress;
-                command_ack.result_param2 = command_srv_data.response.ack.result_param2;
+            if (command_srv.call(cmd_srv_data)) {
+                command_ack.result        = cmd_srv_data.response.ack.result;
+                command_ack.progress      = cmd_srv_data.response.ack.progress;
+                command_ack.result_param2 = cmd_srv_data.response.ack.result_param2;
                 _command->send_ack(command_ack);
                 return;
             } else
@@ -201,13 +201,12 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
                 }
 
                 ros::ServiceClient inspection_srv = _nh.serviceClient<mavsdk_ros::InspectionPlan>("inspection");
-                mavsdk_ros::InspectionPlan inspection_plan_srv_data;
-                inspection_plan_srv_data.request.info = waypoint_list_msg;
+                mavsdk_ros::InspectionPlan insp_plan_srv_data;
+                insp_plan_srv_data.request.info = waypoint_list_msg;
 
-                if (inspection_srv.call(inspection_plan_srv_data) &&
-                    inspection_plan_srv_data.response.ack.ack <
-                        static_cast<uint8_t>(mavsdk::InspectionBase::Ack::Unknown)) {
-                    ack = static_cast<mavsdk::InspectionBase::Ack>(inspection_plan_srv_data.response.ack.ack);
+                if (inspection_srv.call(insp_plan_srv_data) &&
+                    insp_plan_srv_data.response.ack.data < static_cast<uint8_t>(mavsdk::InspectionBase::Ack::Unknown)) {
+                    ack = static_cast<mavsdk::InspectionBase::Ack>(insp_plan_srv_data.response.ack.data);
                 }
             }
         }
