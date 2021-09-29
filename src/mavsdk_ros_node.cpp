@@ -12,6 +12,8 @@
 #include <std_msgs/UInt16.h>
 
 #include <mavsdk_ros/Command.h>
+#include <mavsdk_ros/InspectionPlan.h>
+#include <mavsdk_ros/WaypointsAck.h>
 
 #include <mavsdk_ros/mavsdk_ros_node.h>
 
@@ -155,7 +157,6 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
 
     _received_inspection_set_current_pub = _nh.advertise<std_msgs::UInt16>("inspection_set_current", 10);
-    _downloaded_inspection_wp_list_pub   = _nh.advertise<mavsdk_ros::WaypointList>("inspection_wp_list", 10, true);
 
     _inspection->subscribe_inspection_set_current([&](uint16_t seq) {
         std_msgs::UInt16 set_current_msg;
@@ -177,26 +178,40 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
             "Inspection download callback. Result [" << result << "] Plan ID [" << waypoint_list.plan_id
                                                      << "] Waypoint list size [" << waypoint_list.items.size() << "]");
 
-        if (result == mavsdk::InspectionBase::Result::Success) {
-            mavsdk_ros::WaypointList waypoint_list_msg;
-            waypoint_list_msg.plan_id = waypoint_list.plan_id;
-            for (auto waypoint_item_base : waypoint_list.items) {
-                mavsdk_ros::WaypointItem waypoint_item;
-                waypoint_item.task_id      = waypoint_item_base.task_id;
-                waypoint_item.command      = waypoint_item_base.command;
-                waypoint_item.autocontinue = waypoint_item_base.autocontinue;
-                waypoint_item.param1       = waypoint_item_base.param1;
-                waypoint_item.param2       = waypoint_item_base.param2;
-                waypoint_item.param3       = waypoint_item_base.param3;
-                waypoint_item.param4       = waypoint_item_base.param4;
-                waypoint_item.x            = waypoint_item_base.x;
-                waypoint_item.y            = waypoint_item_base.y;
-                waypoint_item.z            = waypoint_item_base.z;
-                waypoint_list_msg.items.push_back(waypoint_item);
-            }
+        mavsdk::InspectionBase::Ack ack = mavsdk::InspectionBase::Ack::Error;
 
-            _downloaded_inspection_wp_list_pub.publish(waypoint_list_msg);
+        if (result == mavsdk::InspectionBase::Result::Success) {
+            bool srv_exists = ros::service::exists("inspection", false);
+            if (srv_exists) {
+                mavsdk_ros::WaypointList waypoint_list_msg;
+                waypoint_list_msg.plan_id = waypoint_list.plan_id;
+                for (auto waypoint_item_base : waypoint_list.items) {
+                    mavsdk_ros::WaypointItem waypoint_item;
+                    waypoint_item.task_id      = waypoint_item_base.task_id;
+                    waypoint_item.command      = waypoint_item_base.command;
+                    waypoint_item.autocontinue = waypoint_item_base.autocontinue;
+                    waypoint_item.param1       = waypoint_item_base.param1;
+                    waypoint_item.param2       = waypoint_item_base.param2;
+                    waypoint_item.param3       = waypoint_item_base.param3;
+                    waypoint_item.param4       = waypoint_item_base.param4;
+                    waypoint_item.x            = waypoint_item_base.x;
+                    waypoint_item.y            = waypoint_item_base.y;
+                    waypoint_item.z            = waypoint_item_base.z;
+                    waypoint_list_msg.items.push_back(waypoint_item);
+                }
+
+                ros::ServiceClient inspection_srv = _nh.serviceClient<mavsdk_ros::InspectionPlan>("inspection");
+                mavsdk_ros::InspectionPlan inspection_plan_srv_data;
+                inspection_plan_srv_data.request.info = waypoint_list_msg;
+
+                if (inspection_srv.call(inspection_plan_srv_data) &&
+                    inspection_plan_srv_data.response.ack.ack <
+                        static_cast<uint8_t>(mavsdk::InspectionBase::Ack::Unknown)) {
+                    ack = static_cast<mavsdk::InspectionBase::Ack>(inspection_plan_srv_data.response.ack.ack);
+                }
+            }
         }
+        _inspection->send_download_ack(ack);
     });
 
     // clang-format off

@@ -18,7 +18,6 @@
 
 // msgs
 #include <mavsdk_ros/AlarmStatus.h>
-#include <mavsdk_ros/WaypointList.h>
 #include <mavsdk_ros/TextStatus.h>
 
 // srvs
@@ -90,7 +89,6 @@ private:
 
     // ROS Publishers
     ros::Publisher _received_inspection_set_current_pub;
-    ros::Publisher _downloaded_inspection_wp_list_pub;
 
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
