@@ -91,7 +91,7 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
         mavsdk::CommandBase::CommandAck command_ack;
         command_ack.command = cmd.command;
 
-        bool srv_exists = ros::service::exists("command", false);
+        bool srv_exists = ros::service::exists("/command", false);
         if (srv_exists) {
             mavsdk_ros::CommandLong command_long_msg;
             command_long_msg.command      = cmd.command;
@@ -104,7 +104,7 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
             command_long_msg.param6       = cmd.params.param6;
             command_long_msg.param7       = cmd.params.param7;
 
-            ros::ServiceClient command_srv = _nh.serviceClient<mavsdk_ros::Command>("command");
+            ros::ServiceClient command_srv = _nh.serviceClient<mavsdk_ros::Command>("/command");
             mavsdk_ros::Command cmd_srv_data;
             cmd_srv_data.request.info = command_long_msg;
 
@@ -181,7 +181,7 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
         mavsdk::InspectionBase::Ack ack = mavsdk::InspectionBase::Ack::Error;
 
         if (result == mavsdk::InspectionBase::Result::Success) {
-            bool srv_exists = ros::service::exists("inspection", false);
+            bool srv_exists = ros::service::exists("/inspection", false);
             if (srv_exists) {
                 mavsdk_ros::WaypointList waypoint_list_msg;
                 waypoint_list_msg.plan_id = waypoint_list.plan_id;
@@ -200,7 +200,7 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
                     waypoint_list_msg.items.push_back(waypoint_item);
                 }
 
-                ros::ServiceClient inspection_srv = _nh.serviceClient<mavsdk_ros::InspectionPlan>("inspection");
+                ros::ServiceClient inspection_srv = _nh.serviceClient<mavsdk_ros::InspectionPlan>("/inspection");
                 mavsdk_ros::InspectionPlan insp_plan_srv_data;
                 insp_plan_srv_data.request.info = waypoint_list_msg;
 
