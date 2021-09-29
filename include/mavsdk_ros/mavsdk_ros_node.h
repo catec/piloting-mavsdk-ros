@@ -18,8 +18,6 @@
 
 // msgs
 #include <mavsdk_ros/AlarmStatus.h>
-#include <mavsdk_ros/CommandLong.h>
-#include <mavsdk_ros/CommandAck.h>
 #include <mavsdk_ros/WaypointList.h>
 #include <mavsdk_ros/TextStatus.h>
 
@@ -53,7 +51,6 @@ private:
     void initTelemetry(std::shared_ptr<mavsdk::System>& target_system);
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
-    void commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
     void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose_msg, const geometry_msgs::TwistStamped::ConstPtr& velocity_msg);
     void textStatusCb(const mavsdk_ros::TextStatus::ConstPtr& msg);
     
@@ -92,13 +89,11 @@ private:
     ros::ServiceServer _update_reached_waypoint_item_srv;
 
     // ROS Publishers
-    ros::Publisher _received_commands_pub;
     ros::Publisher _received_inspection_set_current_pub;
     ros::Publisher _downloaded_inspection_wp_list_pub;
 
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
-    ros::Subscriber _commands_ack_sub;
     ros::Subscriber _text_status_sub;
     message_filters::Subscriber<geometry_msgs::PoseStamped> _pose_sub;
     message_filters::Subscriber<geometry_msgs::TwistStamped> _vel_sub;

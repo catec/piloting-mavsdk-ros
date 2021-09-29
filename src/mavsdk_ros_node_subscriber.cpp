@@ -32,17 +32,6 @@ void MavsdkRosNode::alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg)
     _alarm->send_alarm_status(alarm_status);
 }
 
-void MavsdkRosNode::commandsAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg)
-{
-    mavsdk::CommandBase::CommandAck command_ack;
-    command_ack.command       = msg->command;
-    command_ack.result        = msg->result;
-    command_ack.progress      = msg->progress;
-    command_ack.result_param2 = msg->result_param2;
-
-    _command->send_ack(command_ack);
-}
-
 void MavsdkRosNode::telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose_msg, const geometry_msgs::TwistStamped::ConstPtr& velocity_msg)
 {
     mavsdk::TelemetryBase::PositionVelocityNed vehicle_position;

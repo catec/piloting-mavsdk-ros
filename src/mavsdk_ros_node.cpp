@@ -11,6 +11,8 @@
 
 #include <std_msgs/UInt16.h>
 
+#include <mavsdk_ros/Command.h>
+
 #include <mavsdk_ros/mavsdk_ros_node.h>
 
 namespace mavsdk_ros {
@@ -45,7 +47,8 @@ bool MavsdkRosNode::init()
 
         double elapsed_time = (ros::Time::now() - begin).toSec();
         if (elapsed_time >= 30.0) {
-            ROS_ERROR("No target system (%d) found in %.2f seconds. Terminating...", _params.target_system_id, elapsed_time);
+            ROS_ERROR(
+                "No target system (%d) found in %.2f seconds. Terminating...", _params.target_system_id, elapsed_time);
             return false;
         }
 
@@ -82,29 +85,46 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
 {
     _command = std::make_shared<mavsdk::CommandRoboticVehicle>(target_system);
 
-    _commands_ack_sub = _nh.subscribe<mavsdk_ros::CommandAck>("commands_ack", 10, &MavsdkRosNode::commandsAckCb, this);
-
-    _received_commands_pub = _nh.advertise<mavsdk_ros::CommandLong>("commands", 10);
     _command->subscribe_command([&](mavsdk::CommandBase::CommandLong cmd) {
-        mavsdk_ros::CommandLong command_msg;
-        command_msg.command      = cmd.command;
-        command_msg.confirmation = cmd.confirmation;
-        command_msg.param1       = cmd.params.param1;
-        command_msg.param2       = cmd.params.param2;
-        command_msg.param3       = cmd.params.param3;
-        command_msg.param4       = cmd.params.param4;
-        command_msg.param5       = cmd.params.param5;
-        command_msg.param6       = cmd.params.param6;
-        command_msg.param7       = cmd.params.param7;
+        mavsdk::CommandBase::CommandAck command_ack;
+        command_ack.command = cmd.command;
 
-        _received_commands_pub.publish(command_msg);
+        bool srv_exists = ros::service::exists("command", false);
+        if (srv_exists) {
+            mavsdk_ros::CommandLong command_long;
+            command_long.command      = cmd.command;
+            command_long.confirmation = cmd.confirmation;
+            command_long.param1       = cmd.params.param1;
+            command_long.param2       = cmd.params.param2;
+            command_long.param3       = cmd.params.param3;
+            command_long.param4       = cmd.params.param4;
+            command_long.param5       = cmd.params.param5;
+            command_long.param6       = cmd.params.param6;
+            command_long.param7       = cmd.params.param7;
+
+            ros::ServiceClient command_srv = _nh.serviceClient<mavsdk_ros::Command>("command");
+            mavsdk_ros::Command command_srv_data;
+            command_srv_data.request.info = command_long;
+
+            if (command_srv.call(command_srv_data)) {
+                command_ack.result        = command_srv_data.response.ack.result;
+                command_ack.progress      = command_srv_data.response.ack.progress;
+                command_ack.result_param2 = command_srv_data.response.ack.result_param2;
+                _command->send_ack(command_ack);
+                return;
+            } else
+                command_ack.result = MAV_RESULT_FAILED;
+
+        } else
+            command_ack.result = MAV_RESULT_UNSUPPORTED;
+        _command->send_ack(command_ack);
     });
 }
 
 void MavsdkRosNode::initChecklist(std::shared_ptr<mavsdk::System>& target_system)
 {
     _checklist = std::make_shared<mavsdk::ChecklistRoboticVehicle>(target_system);
-    
+
     mavsdk::ChecklistBase::Checklist checklist_list_empty;
     _checklist->upload_checklist_async(
         [&](mavsdk::ChecklistBase::Result result, mavsdk::ChecklistBase::Ack ack) {
@@ -135,7 +155,7 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
     _inspection = std::make_shared<mavsdk::InspectionRoboticVehicle>(target_system);
 
     _received_inspection_set_current_pub = _nh.advertise<std_msgs::UInt16>("inspection_set_current", 10);
-    _downloaded_inspection_wp_list_pub = _nh.advertise<mavsdk_ros::WaypointList>("inspection_wp_list", 10, true);
+    _downloaded_inspection_wp_list_pub   = _nh.advertise<mavsdk_ros::WaypointList>("inspection_wp_list", 10, true);
 
     _inspection->subscribe_inspection_set_current([&](uint16_t seq) {
         std_msgs::UInt16 set_current_msg;
@@ -151,33 +171,33 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
         },
         waypoint_list_emtpy);
 
-    _inspection->download_inspection_async(
-        [&](mavsdk::InspectionBase::Result result, mavsdk::InspectionBase::WaypointList waypoint_list) {
-            ROS_INFO_STREAM(
-                "Inspection download callback. Result [" << result << "] Plan ID [" << waypoint_list.plan_id << "] Waypoint list size ["
-                                                         << waypoint_list.items.size() << "]");
+    _inspection->download_inspection_async([&](mavsdk::InspectionBase::Result result,
+                                               mavsdk::InspectionBase::WaypointList waypoint_list) {
+        ROS_INFO_STREAM(
+            "Inspection download callback. Result [" << result << "] Plan ID [" << waypoint_list.plan_id
+                                                     << "] Waypoint list size [" << waypoint_list.items.size() << "]");
 
-            if (result == mavsdk::InspectionBase::Result::Success) {
-                mavsdk_ros::WaypointList waypoint_list_msg;
-                waypoint_list_msg.plan_id = waypoint_list.plan_id;
-                for (auto waypoint_item_base : waypoint_list.items) {
-                    mavsdk_ros::WaypointItem waypoint_item;
-                    waypoint_item.task_id      = waypoint_item_base.task_id;
-                    waypoint_item.command      = waypoint_item_base.command;
-                    waypoint_item.autocontinue = waypoint_item_base.autocontinue;
-                    waypoint_item.param1       = waypoint_item_base.param1;
-                    waypoint_item.param2       = waypoint_item_base.param2;
-                    waypoint_item.param3       = waypoint_item_base.param3;
-                    waypoint_item.param4       = waypoint_item_base.param4;
-                    waypoint_item.x            = waypoint_item_base.x;
-                    waypoint_item.y            = waypoint_item_base.y;
-                    waypoint_item.z            = waypoint_item_base.z;
-                    waypoint_list_msg.items.push_back(waypoint_item);
-                }
-
-                _downloaded_inspection_wp_list_pub.publish(waypoint_list_msg);
+        if (result == mavsdk::InspectionBase::Result::Success) {
+            mavsdk_ros::WaypointList waypoint_list_msg;
+            waypoint_list_msg.plan_id = waypoint_list.plan_id;
+            for (auto waypoint_item_base : waypoint_list.items) {
+                mavsdk_ros::WaypointItem waypoint_item;
+                waypoint_item.task_id      = waypoint_item_base.task_id;
+                waypoint_item.command      = waypoint_item_base.command;
+                waypoint_item.autocontinue = waypoint_item_base.autocontinue;
+                waypoint_item.param1       = waypoint_item_base.param1;
+                waypoint_item.param2       = waypoint_item_base.param2;
+                waypoint_item.param3       = waypoint_item_base.param3;
+                waypoint_item.param4       = waypoint_item_base.param4;
+                waypoint_item.x            = waypoint_item_base.x;
+                waypoint_item.y            = waypoint_item_base.y;
+                waypoint_item.z            = waypoint_item_base.z;
+                waypoint_list_msg.items.push_back(waypoint_item);
             }
-        });
+
+            _downloaded_inspection_wp_list_pub.publish(waypoint_list_msg);
+        }
+    });
 
     // clang-format off
     _set_upload_waypoint_list_srv =
