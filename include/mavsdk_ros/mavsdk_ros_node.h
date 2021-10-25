@@ -32,6 +32,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <nav_msgs/Odometry.h>
 
 namespace mavsdk_ros {
 class MavsdkRosNode {
@@ -50,7 +51,11 @@ private:
     void initTelemetry(std::shared_ptr<mavsdk::System>& target_system);
 
     void alarmStatusCb(const mavsdk_ros::AlarmStatus::ConstPtr& msg);
-    void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose_msg, const geometry_msgs::TwistStamped::ConstPtr& velocity_msg);
+    void telemetryCb(const nav_msgs::Odometry::ConstPtr& msg);
+    void telemetryCb(const geometry_msgs::PoseStamped::ConstPtr& pose_msg,
+                     const geometry_msgs::TwistStamped::ConstPtr& twist_msg);
+    void sendTelemetry(const uint32_t stamp_ms, const geometry_msgs::Pose& pose,
+                       const geometry_msgs::Twist& twist);
     void textStatusCb(const mavsdk_ros::TextStatus::ConstPtr& msg);
     
     // clang-format off
@@ -93,6 +98,7 @@ private:
     // ROS Subscribers
     ros::Subscriber _alarm_status_sub;
     ros::Subscriber _text_status_sub;
+    ros::Subscriber _odometry_sub;
     message_filters::Subscriber<geometry_msgs::PoseStamped> _pose_sub;
     message_filters::Subscriber<geometry_msgs::TwistStamped> _vel_sub;
     typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::PoseStamped, geometry_msgs::TwistStamped> MySyncPolicy;

@@ -229,10 +229,10 @@ void MavsdkRosNode::initTelemetry(std::shared_ptr<mavsdk::System>& target_system
 
     _text_status_sub = _nh.subscribe<mavsdk_ros::TextStatus>("text_status", 10, &MavsdkRosNode::textStatusCb, this);
 
-    ros::NodeHandle n;
+    _odometry_sub = _nh.subscribe<nav_msgs::Odometry>("local_position", 1, &MavsdkRosNode::telemetryCb, this);
 
-    _pose_sub.subscribe(n, "mavros/local_position/pose", 1);
-    _vel_sub.subscribe(n, "mavros/local_position/velocity_local", 1);
+    _pose_sub.subscribe(_nh, "local_position/pose", 1);
+    _vel_sub.subscribe(_nh, "local_position/twist", 1);
     _sync.reset(new Sync(MySyncPolicy(10), _pose_sub, _vel_sub));
     _sync->registerCallback(boost::bind(&MavsdkRosNode::telemetryCb, this, _1, _2));
 }
