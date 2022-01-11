@@ -71,6 +71,8 @@ bool MavsdkRosNode::setUploadWaypointListCb(
     mavsdk_ros::SetUploadWaypointList::Request& request, mavsdk_ros::SetUploadWaypointList::Response&)
 {
     mavsdk::InspectionBase::WaypointList waypoint_list;
+    waypoint_list.plan_id = request.waypoint_list.plan_id;
+    waypoint_list.sync_id = request.waypoint_list.sync_id;
 
     for (auto waypoint_item : request.waypoint_list.items) {
         mavsdk::InspectionBase::WaypointItem waypoint_item_base;
