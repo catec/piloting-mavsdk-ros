@@ -1,3 +1,3 @@
-uint32 plan_id
+string plan_uuid
 uint32 sync_id
 WaypointItem[] items

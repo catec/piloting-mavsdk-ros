@@ -175,7 +175,7 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
     _inspection->download_inspection_async([&](mavsdk::InspectionBase::Result result,
                                                mavsdk::InspectionBase::WaypointList waypoint_list) {
         ROS_INFO_STREAM(
-            "Inspection download callback. Result [" << result << "] Plan ID [" << waypoint_list.plan_id
+            "Inspection download callback. Result [" << result << "] Plan UUID [" << waypoint_list.plan_uuid
                                                      << "] Sync ID [" << waypoint_list.sync_id
                                                      << "] Waypoint list size [" << waypoint_list.items.size() << "]");
 
@@ -185,11 +185,11 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
             bool srv_exists = ros::service::exists("/inspection", false);
             if (srv_exists) {
                 mavsdk_ros::WaypointList waypoint_list_msg;
-                waypoint_list_msg.plan_id = waypoint_list.plan_id;
+                waypoint_list_msg.plan_uuid = waypoint_list.plan_uuid;
                 waypoint_list_msg.sync_id = waypoint_list.sync_id;
                 for (auto waypoint_item_base : waypoint_list.items) {
                     mavsdk_ros::WaypointItem waypoint_item;
-                    waypoint_item.task_id      = waypoint_item_base.task_id;
+                    waypoint_item.task_uuid      = waypoint_item_base.task_uuid;
                     waypoint_item.command      = waypoint_item_base.command;
                     waypoint_item.autocontinue = waypoint_item_base.autocontinue;
                     waypoint_item.param1       = waypoint_item_base.param1;

@@ -1,4 +1,4 @@
-uint32 task_id
+string task_uuid
 uint16 command
 uint8 autocontinue
 float32 param1
