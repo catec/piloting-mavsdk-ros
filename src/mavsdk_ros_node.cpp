@@ -190,15 +190,16 @@ void MavsdkRosNode::initInspection(std::shared_ptr<mavsdk::System>& target_syste
                 for (auto waypoint_item_base : waypoint_list.items) {
                     mavsdk_ros::WaypointItem waypoint_item;
                     waypoint_item.task_uuid      = waypoint_item_base.task_uuid;
-                    waypoint_item.command      = waypoint_item_base.command;
-                    waypoint_item.autocontinue = waypoint_item_base.autocontinue;
-                    waypoint_item.param1       = waypoint_item_base.param1;
-                    waypoint_item.param2       = waypoint_item_base.param2;
-                    waypoint_item.param3       = waypoint_item_base.param3;
-                    waypoint_item.param4       = waypoint_item_base.param4;
-                    waypoint_item.x            = waypoint_item_base.x;
-                    waypoint_item.y            = waypoint_item_base.y;
-                    waypoint_item.z            = waypoint_item_base.z;
+                    waypoint_item.task_type_uuid = waypoint_item_base.task_type_uuid;
+                    waypoint_item.command        = waypoint_item_base.command;
+                    waypoint_item.autocontinue   = waypoint_item_base.autocontinue;
+                    waypoint_item.param1         = waypoint_item_base.param1;
+                    waypoint_item.param2         = waypoint_item_base.param2;
+                    waypoint_item.param3         = waypoint_item_base.param3;
+                    waypoint_item.param4         = waypoint_item_base.param4;
+                    waypoint_item.x              = waypoint_item_base.x;
+                    waypoint_item.y              = waypoint_item_base.y;
+                    waypoint_item.z              = waypoint_item_base.z;
                     waypoint_list_msg.items.push_back(waypoint_item);
                 }
 

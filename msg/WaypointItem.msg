@@ -1,4 +1,5 @@
 string task_uuid
+string task_type_uuid
 uint16 command
 uint8 autocontinue
 float32 param1
