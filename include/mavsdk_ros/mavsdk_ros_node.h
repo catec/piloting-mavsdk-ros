@@ -19,6 +19,7 @@
 // msgs
 #include <mavsdk_ros/AlarmStatus.h>
 #include <mavsdk_ros/TextStatus.h>
+#include <mavsdk_ros/CommandAck.h>
 
 // srvs
 #include <mavsdk_ros/SetUploadAlarm.h>
@@ -57,6 +58,7 @@ private:
     void sendTelemetry(const uint32_t stamp_ms, const geometry_msgs::Pose& pose,
                        const geometry_msgs::Twist& twist);
     void textStatusCb(const mavsdk_ros::TextStatus::ConstPtr& msg);
+    void commandAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg);
     
     // clang-format off
     bool setUploadAlarmCb(mavsdk_ros::SetUploadAlarm::Request& request,
@@ -75,7 +77,7 @@ private:
 
     ros::NodeHandle _nh;
     Parameters _params;
-
+    
     std::shared_ptr<mavsdk::Mavsdk> _mavsdk;
     std::shared_ptr<mavsdk::TelemetryRoboticVehicle> _telemetry;
     std::shared_ptr<mavsdk::InspectionRoboticVehicle> _inspection;
@@ -99,10 +101,12 @@ private:
     ros::Subscriber _alarm_status_sub;
     ros::Subscriber _text_status_sub;
     ros::Subscriber _odometry_sub;
+    ros::Subscriber _command_ack_sub;
     message_filters::Subscriber<geometry_msgs::PoseStamped> _pose_sub;
     message_filters::Subscriber<geometry_msgs::TwistStamped> _vel_sub;
     typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::PoseStamped, geometry_msgs::TwistStamped> MySyncPolicy;
     typedef message_filters::Synchronizer<MySyncPolicy> Sync;
     std::shared_ptr<Sync> _sync;
+    uint16_t _current_command_in_progress;
 };
 } // namespace mavsdk_ros

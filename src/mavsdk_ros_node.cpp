@@ -85,6 +85,8 @@ void MavsdkRosNode::initAlarm(std::shared_ptr<mavsdk::System>& target_system)
 
 void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
 {
+    _command_ack_sub = _nh.subscribe<mavsdk_ros::CommandAck>("command_ack", 10, &MavsdkRosNode::commandAckCb, this);
+
     _command = std::make_shared<mavsdk::CommandRoboticVehicle>(target_system);
 
     _command->subscribe_command([&](mavsdk::CommandBase::CommandLong cmd) {
@@ -113,6 +115,9 @@ void MavsdkRosNode::initCommand(std::shared_ptr<mavsdk::System>& target_system)
                 command_ack.progress      = cmd_srv_data.response.ack.progress;
                 command_ack.result_param2 = cmd_srv_data.response.ack.result_param2;
                 _command->send_ack(command_ack);
+                
+                if(command_ack.result == MAV_RESULT_IN_PROGRESS)
+                    _current_command_in_progress = command_ack.command;
                 return;
             } else
                 command_ack.result = MAV_RESULT_FAILED;

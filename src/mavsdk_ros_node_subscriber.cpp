@@ -92,4 +92,18 @@ void MavsdkRosNode::textStatusCb(const mavsdk_ros::TextStatus::ConstPtr& msg)
     _telemetry->send_text_status(text_status);
 }
 
+void MavsdkRosNode::commandAckCb(const mavsdk_ros::CommandAck::ConstPtr& msg)
+{
+    if(_current_command_in_progress != msg->command)
+        return;
+    mavsdk::CommandBase::CommandAck command_ack;
+
+    command_ack.command  = msg->command;
+    command_ack.result   = msg->result;
+    command_ack.progress = msg->progress;
+    command_ack.result_param2 = msg->result_param2;
+
+    _command->send_ack(command_ack);
+}
+
 } // namespace mavsdk_ros
